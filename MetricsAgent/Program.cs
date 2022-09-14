@@ -43,6 +43,9 @@ namespace MetricsAgent
             #region Configure Repository
 
             builder.Services.AddScoped<ICpuMetricsRepository, CpuMetricsRepository>();
+            builder.Services.AddScoped<IHddMetricsRepository, HddMetricsRepository>();
+            builder.Services.AddScoped<IDotnetMetricsRepository, DotnetMetricsRepository>();
+            builder.Services.AddScoped<IRamMetricsRepository, RamMetricsRepository>();
 
             #endregion
 
@@ -54,9 +57,15 @@ namespace MetricsAgent
             builder.Services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
             // Регистрация сервиса самой задачи
             builder.Services.AddSingleton<CpuMetricJob>();
+            builder.Services.AddSingleton<HddMetricJob>();
+            builder.Services.AddSingleton<DotNetMetricJob>();
+            builder.Services.AddSingleton<RamMetricJob>();
 
             // https://www.freeformatter.com/cron-expression-generator-quartz.html
             builder.Services.AddSingleton(new JobSchedule(typeof(CpuMetricJob), "0/5 * * ? * * *"));
+            builder.Services.AddSingleton(new JobSchedule(typeof(HddMetricJob), "0/5 * * ? * * *"));
+            builder.Services.AddSingleton(new JobSchedule(typeof(DotNetMetricJob), "0/5 * * ? * * *"));
+            builder.Services.AddSingleton(new JobSchedule(typeof(RamMetricJob), "0/5 * * ? * * *"));
 
             builder.Services.AddHostedService<QuartzHostedService>();
 
@@ -135,13 +144,7 @@ namespace MetricsAgent
                 migrationRunner.MigrateUp();
 
             }
-
-                
-
             app.Run();
-
-            
-
         }
 
         //private static void ConfigureSqlLiteConnection(WebApplicationBuilder? builder)
@@ -152,10 +155,7 @@ namespace MetricsAgent
         //}
 
         //private static void PrepareSchema(SQLiteConnection connection)
-        //{
-            
-            
-            
+        //{     
         //    using (var command = new SQLiteCommand(connection))
         //    {
         //        // Задаём новый текст команды для выполнения
