@@ -16,13 +16,10 @@ namespace MetricsAgent.Controllers
     public class CpuMetricsController : ControllerBase
     {
         #region Services
-
         private readonly ILogger<CpuMetricsController> _logger;
         private readonly ICpuMetricsRepository _cpuMetricsRepository;
         private readonly IMapper _mapper;
-
         #endregion
-
 
         public CpuMetricsController(
             ICpuMetricsRepository cpuMetricsRepository,
@@ -37,14 +34,6 @@ namespace MetricsAgent.Controllers
         [HttpPost("create")]
         public IActionResult Create([FromBody] CpuMetricCreateRequest request)
         {
-            // Вариант 1
-            //_cpuMetricsRepository.Create(new Models.CpuMetric
-            //{
-            //    Value = request.Value,
-            //    Time = (int)request.Time.TotalSeconds
-            //});
-
-            // Вариант 2 (AutoMapper)
             _cpuMetricsRepository.Create(_mapper.Map<CpuMetric>(request));
             return Ok();
         }
@@ -60,26 +49,6 @@ namespace MetricsAgent.Controllers
             [FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
             _logger.LogInformation("Get cpu metrics call.");
-
-            // Вариант 1:
-            //List<CpuMetricDto> list = new List<CpuMetricDto>();
-            //foreach(var metric in _cpuMetricsRepository.GetByTimePeriod(fromTime, toTime))
-            //{
-            //    list.Add(new CpuMetricDto
-            //    {
-            //        Value = metric.Value,
-            //        Time = metric.Time
-            //    });
-            //}
-
-            // Вариант 2:
-            //return Ok(_cpuMetricsRepository.GetByTimePeriod(fromTime, toTime).Select(metric => new CpuMetricDto
-            //{
-            //    Time = metric.Time,
-            //    Value = metric.Value
-            //}).ToList());
-
-            // Вариант 3 (AutoMapper)
             return Ok(_cpuMetricsRepository.GetByTimePeriod(fromTime, toTime)
                 .Select(metric => _mapper.Map<CpuMetricDto>(metric)).ToList());
         }
@@ -90,17 +59,5 @@ namespace MetricsAgent.Controllers
             return Ok(_cpuMetricsRepository.GetAll()
                 .Select(metric => _mapper.Map<CpuMetricDto>(metric)).ToList());
         }
-
-        // TODO: Домашнее задание [Пункт 2]
-        // В проект агента сбора метрик добавьте контроллеры для сбора метрик, аналогичные
-        // менеджеру сбора метрик.Добавьте методы для получения метрик с агента, доступные по
-        //следующим путям
-        // a. api/metrics/cpu/from/{fromTime}/to/{toTime} [ВЫПОЛНИЛИ ВМЕСТЕ]
-        // b. api / metrics / dotnet / errors - count / from /{ fromTime}/ to /{ toTime}
-        // c. api / metrics / network / from /{ fromTime}/ to /{ toTime}
-        // d. api / metrics / hdd / left / from /{ fromTime}/ to /{ toTime}
-        // e. api / metrics / ram / available / from /{ fromTime}/ to /{ toTime}
-
-
     }
 }
